@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Board — Three Cities Power Rankings</title>
+<style>
+  /* ============ CONFIG ============ */
+  /* Point these at the public JSON your Gumloop publish node writes. */
+  /* BOARD_URL is required. LEDGER_URL is optional (enables receipts). */
+
+  :root{
+    --ink:#0E0F13;          /* near-black ground */
+    --paper:#11131A;        /* card ground */
+    --line:#23262F;         /* hairlines */
+    --mute:#7E8595;         /* secondary text */
+    --text:#E8E9ED;         /* primary text */
+    --gold:#C9A24B;         /* throne / accent */
+    --up:#5BD6A0;           /* riser */
+    --down:#E5736B;         /* faller */
+    --ws:#4F9D8A;           /* Wall Street */
+    --sv:#6E8BE0;           /* Silicon Valley */
+    --dc:#C77B5C;           /* Washington */
+    --relegation:#1A1410;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--ink);color:var(--text);
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    -webkit-font-smoothing:antialiased;line-height:1.4;
+  }
+  .wrap{max-width:860px;margin:0 auto;padding:0 20px 80px}
+
+  /* ============ MASTHEAD ============ */
+  header{padding:48px 0 28px;border-bottom:1px solid var(--line)}
+  .kicker{
+    font-family:"SF Mono",ui-monospace,Menlo,monospace;
+    font-size:11px;letter-spacing:.28em;text-transform:uppercase;
+    color:var(--mute);margin-bottom:16px;
+  }
+  h1{
+    font-size:clamp(38px,8vw,68px);font-weight:600;letter-spacing:-.02em;
+    line-height:.96;margin-bottom:14px;
+  }
+  h1 em{font-style:italic;color:var(--gold)}
+  .standfirst{color:var(--mute);font-size:16px;max-width:52ch}
+  .updated{
+    font-family:"SF Mono",ui-monospace,Menlo,monospace;
+    font-size:11px;letter-spacing:.1em;color:var(--mute);margin-top:18px;
+  }
+  .updated b{color:var(--up);font-weight:400}
+
+  /* ============ LEGEND ============ */
+  .legend{
+    display:flex;gap:18px;flex-wrap:wrap;padding:16px 0;
+    font-family:"SF Mono",ui-monospace,Menlo,monospace;
+    font-size:11px;letter-spacing:.08em;color:var(--mute);
+    border-bottom:1px solid var(--line);
+  }
+  .legend span{display:inline-flex;align-items:center;gap:7px}
+  .dot{width:9px;height:9px;border-radius:50%}
+
+  /* ============ BOARD ============ */
+  .board{margin-top:6px}
+  .row{
+    display:grid;grid-template-columns:54px 1fr auto;align-items:center;
+    gap:14px;padding:18px 0;border-bottom:1px solid var(--line);
+    cursor:pointer;transition:background .15s ease;
+  }
+  .row:hover{background:#15171F}
+  .row.throne{
+    background:linear-gradient(90deg,rgba(201,162,75,.10),transparent 60%);
+    border-bottom:1px solid rgba(201,162,75,.3);
+  }
+  .row.relegation{background:linear-gradient(90deg,rgba(199,123,92,.07),transparent 70%)}
+
+  .rank{
+    font-family:"SF Mono",ui-monospace,Menlo,monospace;
+    font-size:26px;font-weight:500;text-align:center;color:var(--text);
+    position:relative;
+  }
+  .throne .rank{color:var(--gold)}
+  .crown{display:block;font-size:10px;letter-spacing:.1em;color:var(--gold);margin-top:2px}
+
+  .who{min-width:0}
+  .name{font-size:21px;font-weight:600;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
+  .city-tag{
+    width:8px;height:8px;border-radius:50%;flex:none;
+  }
+  .city-ws{background:var(--ws)} .city-sv{background:var(--sv)} .city-dc{background:var(--dc)}
+  .why{color:var(--mute);font-size:14px;margin-top:4px;max-width:60ch;
+    overflow:hidden;text-overflow:ellipsis;display:-webkit-box;
+    -webkit-line-clamp:2;-webkit-box-orient:vertical}
+
+  .meta{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+  .score{
+    font-family:"SF Mono",ui-monospace,Menlo,monospace;
+    font-size:20px;font-weight:500;
+  }
+  .delta{
+    font-family:"SF Mono",ui-monospace,Menlo,monospace;
+    font-size:12px;letter-spacing:.04em;
+  }
+  .delta.up{color:var(--up)} .delta.down{color:var(--down)} .delta.flat{color:var(--mute)}
+  .delta.new{color:var(--gold)}
+
+  /* relegation divider */
+  .zone-label{
+    font-family:"SF Mono",ui-monospace,Menlo,monospace;
+    font-size:10px;letter-spacing:.24em;text-transform:uppercase;
+    color:var(--dc);padding:22px 0 6px;border-bottom:1px solid var(--line);
+  }
+
+  /* receipts drawer */
+  .receipts{
+    grid-column:1/-1;max-height:0;overflow:hidden;
+    transition:max-height .28s ease;
+  }
+  .row.open .receipts{max-height:400px}
+  .receipts-inner{padding:6px 0 14px 68px}
+  .receipt{
+    font-size:13px;color:var(--mute);padding:8px 0;border-top:1px solid var(--line);
+    display:flex;gap:12px;align-items:baseline;
+  }
+  .receipt:first-child{border-top:none}
+  .receipt .rdate{
+    font-family:"SF Mono",ui-monospace,Menlo,monospace;
+    font-size:11px;color:var(--mute);flex:none;width:74px;
+  }
+  .receipt .rwhy{color:var(--text)}
+  .receipt a{color:var(--sv);text-decoration:none;border-bottom:1px solid rgba(110,139,224,.3)}
+  .receipt .rdelta{font-family:"SF Mono",ui-monospace,Menlo,monospace;flex:none}
+  .rdelta.pos{color:var(--up)} .rdelta.neg{color:var(--down)}
+  .no-receipts{font-size:13px;color:var(--mute);font-style:italic;padding:8px 0}
+
+  /* states */
+  .state{padding:80px 20px;text-align:center;color:var(--mute);font-size:16px}
+  .state .big{font-size:22px;color:var(--text);margin-bottom:8px}
+
+  footer{margin-top:50px;padding-top:24px;border-top:1px solid var(--line);
+    font-size:13px;color:var(--mute);line-height:1.6}
+  footer b{color:var(--text);font-weight:600}
+
+  @media (max-width:560px){
+    .row{grid-template-columns:42px 1fr auto;gap:10px}
+    .name{font-size:18px}.rank{font-size:22px}.score{font-size:17px}
+    .why{-webkit-line-clamp:3}
+    .receipts-inner{padding-left:14px}
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">Three Cities · Wall Street · Silicon Valley · Washington</div>
+    <h1>The <em>Board</em></h1>
+    <p class="standfirst">Who is gaining and losing ground in the three-city war — scored on real events, not reputation. Every rank is a receipt. Tap a name to see what moved it.</p>
+    <div class="updated" id="updated"></div>
+  </header>
+
+  <div class="legend">
+    <span><i class="dot" style="background:var(--ws)"></i>Wall Street</span>
+    <span><i class="dot" style="background:var(--sv)"></i>Silicon Valley</span>
+    <span><i class="dot" style="background:var(--dc)"></i>Washington</span>
+    <span><i class="dot" style="background:var(--up)"></i>Rising</span>
+    <span><i class="dot" style="background:var(--down)"></i>Falling</span>
+  </div>
+
+  <main class="board" id="board">
+    <div class="state"><div class="big">Loading the board…</div>reading the latest standings</div>
+  </main>
+
+  <footer>
+    <b>How scoring works.</b> Players gain and lose points on real, dated events — a deal, a firing, a bill, a defection. Cross-city collisions score harder. Silence decays a score toward the middle. The throne changes hands only when someone's score truly passes the leader. Names below the line are fighting to stay on the board.
+  </footer>
+</div>
+
+<script>
+  // ============ CONFIG: set these two URLs ============
+  const BOARD_URL  = "REPLACE_WITH_BOARD_JSON_URL";   // required: updated_board_json
+  const LEDGER_URL = "";                               // optional: recent ledger rows JSON -> enables receipts
+
+  const cityClass = c => ({WS:"city-ws",SV:"city-sv",DC:"city-dc"}[String(c||"").toUpperCase()]||"city-sv");
+
+  function deltaCell(d){
+    const s = String(d||"--").trim();
+    if(s==="--"||s==="") return `<span class="delta flat">—</span>`;
+    if(s.toUpperCase()==="NEW") return `<span class="delta new">NEW</span>`;
+    if(/^up/i.test(s)) return `<span class="delta up">▲ ${s.replace(/up\s*/i,"")}</span>`;
+    if(/^down/i.test(s)) return `<span class="delta down">▼ ${s.replace(/down\s*/i,"")}</span>`;
+    return `<span class="delta flat">${s}</span>`;
+  }
+
+  function isRanked(r){ return typeof r==="number" || /^\d+$/.test(String(r)); }
+
+  async function load(){
+    const board = document.getElementById("board");
+    let data;
+    try{
+      const res = await fetch(BOARD_URL, {cache:"no-store"});
+      if(!res.ok) throw new Error(res.status);
+      data = await res.json();
+    }catch(e){
+      board.innerHTML = `<div class="state"><div class="big">The board is between editions.</div>Standings will appear here once today's run publishes.</div>`;
+      return;
+    }
+
+    let ledger = [];
+    if(LEDGER_URL){
+      try{ const lr = await fetch(LEDGER_URL,{cache:"no-store"}); if(lr.ok) ledger = await lr.json(); }catch(e){}
+    }
+    const byPlayer = {};
+    ledger.forEach(row=>{
+      [["winner","delta_winner"],["loser","delta_loser"]].forEach(([nk,dk])=>{
+        const nm=row[nk]; if(!nm||nm==="NONE") return;
+        (byPlayer[nm]=byPlayer[nm]||[]).push({date:row.date,why:row.why_line,peg:row.peg_url,delta:row[dk]});
+      });
+    });
+
+    // keep only ranked + relegation + watch players with numeric ranks; sort
+    const players = data
+      .filter(p=>isRanked(p.rank) && String(p.name).trim() && String(p.name).toLowerCase()!=="name")
+      .sort((a,b)=>Number(a.rank)-Number(b.rank));
+
+    if(!players.length){
+      board.innerHTML = `<div class="state"><div class="big">No standings yet.</div>The board publishes after the next run.</div>`;
+      return;
+    }
+
+    let html = ""; let relegationDrawn=false;
+    players.forEach(p=>{
+      const rank=Number(p.rank);
+      const throne = rank===1;
+      const relegation = rank>=21 && rank<=25;
+      if(relegation && !relegationDrawn){ html += `<div class="zone-label">The relegation zone — fighting to stay on</div>`; relegationDrawn=true; }
+
+      const receipts = (byPlayer[p.name]||[]).slice(-6).reverse();
+      let rec = "";
+      if(LEDGER_URL){
+        rec = receipts.length ? receipts.map(r=>{
+          const dv = Number(r.delta)||0;
+          const dCls = dv>0?"pos":(dv<0?"neg":"");
+          const dStr = dv>0?`+${dv}`:`${dv}`;
+          const why = r.peg ? `<a href="${r.peg}" target="_blank" rel="noopener">${r.why||"event"}</a>` : (r.why||"event");
+          return `<div class="receipt"><span class="rdate">${(r.date||"").slice(0,10)}</span><span class="rwhy">${why}</span><span class="rdelta ${dCls}">${dStr}</span></div>`;
+        }).join("") : `<div class="no-receipts">No scored events in the current window — holding on prior standing.</div>`;
+      }
+
+      html += `
+      <div class="row ${throne?"throne":""} ${relegation?"relegation":""}" data-name="${encodeURIComponent(p.name)}">
+        <div class="rank">${rank}${throne?'<span class="crown">THRONE</span>':''}</div>
+        <div class="who">
+          <div class="name"><span class="city-tag ${cityClass(p.city)}"></span>${p.name}</div>
+          <div class="why">${p.why_line||""}</div>
+        </div>
+        <div class="meta">
+          <span class="score">${Math.round(Number(p.score))}</span>
+          ${deltaCell(p.delta)}
+        </div>
+        ${LEDGER_URL?`<div class="receipts"><div class="receipts-inner">${rec}</div></div>`:""}
+      </div>`;
+    });
+
+    board.innerHTML = html;
+
+    // updated stamp
+    const stamp = document.getElementById("updated");
+    const today = new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"});
+    stamp.innerHTML = `<b>●</b> Updated ${today}`;
+
+    if(LEDGER_URL){
+      board.querySelectorAll(".row").forEach(row=>{
+        row.addEventListener("click",()=>row.classList.toggle("open"));
+      });
+    }
+  }
+  load();
+</script>
+</body>
+</html>
