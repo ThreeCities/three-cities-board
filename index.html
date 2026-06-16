@@ -111,8 +111,10 @@
   .state .big{font-family:var(--sans);font-size:24px;color:var(--text);margin-bottom:10px}
 
   footer{margin-top:54px;padding-top:26px;border-top:1px solid var(--line);
-    font-size:clamp(14px,1.4vw,16px);color:var(--mute);line-height:1.65}
+    font-size:clamp(14px,1.4vw,16px);color:var(--mute);line-height:1.65;
+    display:flex;gap:20px;align-items:flex-start}
   footer b{color:var(--text);font-weight:600}
+  .footer-logo{display:none;flex:none}
 
   /* ============ INLINE OPT-IN BAND (mid-board) ============ */
   .optin-band{
@@ -132,10 +134,10 @@
   }
 
   @media (max-width:600px){
-    .mast{gap:20px;flex-direction:column;align-items:center;text-align:center}
-    .mast-text{order:1}
-    .logo{order:2;height:96px}
-    .name,.standfirst{text-align:left}
+    .mast{gap:18px}
+    .logo{display:none}
+    .footer-logo{display:block;height:84px}
+    footer{flex-direction:column;align-items:center;text-align:left;gap:24px}
     .row{grid-template-columns:46px 1fr auto;gap:12px}
     .receipts-inner{padding-left:16px}
   }
@@ -168,7 +170,8 @@
   </main>
 
   <footer>
-    <b>How scoring works.</b> Players gain and lose points on real, dated events – a deal, a firing, a bill, a defection. Cross-city collisions score harder. Silence decays a score toward the middle. The throne changes hands only when someone's score truly passes the leader. Names below the line are fighting to stay on the board.
+    <img class="footer-logo" src="threecities_logo.png" alt="Three Cities">
+    <div><b>How scoring works.</b> Players gain and lose points on real, dated events – a deal, a firing, a bill, a defection. Cross-city collisions score harder. Silence decays a score toward the middle. The throne changes hands only when someone's score truly passes the leader. Names below the line are fighting to stay on the board.</div>
   </footer>
 </div>
 
