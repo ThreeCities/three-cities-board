@@ -3,149 +3,139 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The Board — Three Cities Power Rankings</title>
+<title>Three Cities Power Rankings Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Saira+Semi+Condensed:wght@400;500;600;700&family=Saira:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  /* ============ CONFIG ============ */
-  /* Point these at the public JSON your Gumloop publish node writes. */
-  /* BOARD_URL is required. LEDGER_URL is optional (enables receipts). */
+  /* ============ CONFIG ============
+     BOARD_URL required. LEDGER_URL optional (enables receipts).
+     Logo: threecities_logo.png must sit in the same folder as this file. */
 
   :root{
-    --ink:#0E0F13;          /* near-black ground */
-    --paper:#11131A;        /* card ground */
-    --line:#23262F;         /* hairlines */
-    --mute:#7E8595;         /* secondary text */
-    --text:#E8E9ED;         /* primary text */
-    --gold:#C9A24B;         /* throne / accent */
-    --up:#5BD6A0;           /* riser */
-    --down:#E5736B;         /* faller */
-    --ws:#4F9D8A;           /* Wall Street */
-    --sv:#6E8BE0;           /* Silicon Valley */
-    --dc:#C77B5C;           /* Washington */
-    --relegation:#1A1410;
+    --navy:#161A30;          /* deepened brand navy ground */
+    --navy-2:#1D223E;        /* brand navy */
+    --navy-card:#1F2648;     /* hover / cards */
+    --line:#2C3358;          /* hairlines */
+    --gold:#CFB25C;          /* Wall Street + wordmark gold */
+    --blue:#5899BA;          /* Silicon Valley + brand circuit blue */
+    --blue-lt:#92BCD2;       /* lighter brand blue */
+    --red:#80344A;           /* Washington capitol red */
+    --throne:#6FB4D6;        /* lifted blue = throne luminance */
+    --text:#EEF1F6;
+    --mute:#9AA2BE;
+    --up:#22C55E;            /* sharp green (functional, off-brand) */
+    --down:#EF4444;          /* sharp red (functional, off-brand) */
+    --sans:"Saira Semi Condensed",system-ui,sans-serif;
+    --sans-body:"Saira",system-ui,sans-serif;
   }
   *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
   body{
-    background:var(--ink);color:var(--text);
-    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
-    -webkit-font-smoothing:antialiased;line-height:1.4;
+    background:
+      radial-gradient(1100px 620px at 78% -8%, rgba(88,153,186,.10), transparent 60%),
+      radial-gradient(900px 600px at 0% 100%, rgba(207,178,92,.06), transparent 55%),
+      var(--navy);
+    color:var(--text);font-family:var(--sans-body);
+    -webkit-font-smoothing:antialiased;line-height:1.45;
   }
-  .wrap{max-width:860px;margin:0 auto;padding:0 20px 80px}
+  .wrap{max-width:960px;margin:0 auto;padding:0 24px 80px}
 
-  /* ============ MASTHEAD ============ */
-  header{padding:48px 0 28px;border-bottom:1px solid var(--line)}
-  .kicker{
-    font-family:"SF Mono",ui-monospace,Menlo,monospace;
-    font-size:11px;letter-spacing:.28em;text-transform:uppercase;
-    color:var(--mute);margin-bottom:16px;
-  }
-  h1{
-    font-size:clamp(38px,8vw,68px);font-weight:600;letter-spacing:-.02em;
-    line-height:.96;margin-bottom:14px;
-  }
-  h1 em{font-style:italic;color:var(--gold)}
-  .standfirst{color:var(--mute);font-size:16px;max-width:52ch}
-  .updated{
-    font-family:"SF Mono",ui-monospace,Menlo,monospace;
-    font-size:11px;letter-spacing:.1em;color:var(--mute);margin-top:18px;
-  }
-  .updated b{color:var(--up);font-weight:400}
+  header{padding:44px 0 26px;border-bottom:1px solid var(--line)}
+  .mast{display:flex;align-items:center;gap:30px;justify-content:space-between}
+  .logo{width:auto;height:150px;flex:none;filter:drop-shadow(0 4px 18px rgba(0,0,0,.35))}
+  .mast-text{min-width:0;flex:1}
+  h1{font-family:var(--sans);font-size:clamp(34px,5.2vw,60px);font-weight:700;
+    letter-spacing:.005em;line-height:.98;text-transform:uppercase;text-wrap:balance}
+  h1 .pwr{color:var(--gold)} h1 .brd{color:var(--blue)}
+  .standfirst{color:var(--mute);font-size:clamp(16px,1.55vw,20px);max-width:64ch;
+    margin-top:14px;font-weight:400}
+  .updated{font-family:var(--sans);font-size:clamp(12px,1.1vw,14px);letter-spacing:.14em;
+    color:var(--mute);margin-top:16px;text-transform:uppercase}
+  .updated b{color:var(--up);font-weight:500}
 
-  /* ============ LEGEND ============ */
-  .legend{
-    display:flex;gap:18px;flex-wrap:wrap;padding:16px 0;
-    font-family:"SF Mono",ui-monospace,Menlo,monospace;
-    font-size:11px;letter-spacing:.08em;color:var(--mute);
-    border-bottom:1px solid var(--line);
-  }
-  .legend span{display:inline-flex;align-items:center;gap:7px}
-  .dot{width:9px;height:9px;border-radius:50%}
+  .legend{display:flex;gap:22px;flex-wrap:wrap;padding:18px 0;font-family:var(--sans);
+    font-size:clamp(12px,1.15vw,15px);letter-spacing:.04em;color:var(--mute);
+    border-bottom:1px solid var(--line);text-transform:uppercase}
+  .legend span{display:inline-flex;align-items:center;gap:8px}
+  .dot{width:11px;height:11px;border-radius:50%}
+  .tri-up{width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-bottom:11px solid var(--up)}
+  .tri-down{width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:11px solid var(--down)}
 
-  /* ============ BOARD ============ */
-  .board{margin-top:6px}
-  .row{
-    display:grid;grid-template-columns:54px 1fr auto;align-items:center;
-    gap:14px;padding:18px 0;border-bottom:1px solid var(--line);
-    cursor:pointer;transition:background .15s ease;
-  }
-  .row:hover{background:#15171F}
-  .row.throne{
-    background:linear-gradient(90deg,rgba(201,162,75,.10),transparent 60%);
-    border-bottom:1px solid rgba(201,162,75,.3);
-  }
-  .row.relegation{background:linear-gradient(90deg,rgba(199,123,92,.07),transparent 70%)}
-
-  .rank{
-    font-family:"SF Mono",ui-monospace,Menlo,monospace;
-    font-size:26px;font-weight:500;text-align:center;color:var(--text);
-    position:relative;
-  }
-  .throne .rank{color:var(--gold)}
-  .crown{display:block;font-size:10px;letter-spacing:.1em;color:var(--gold);margin-top:2px}
-
+  .board{margin-top:8px}
+  .row{display:grid;grid-template-columns:64px 1fr auto;align-items:center;gap:18px;
+    padding:20px 0;border-bottom:1px solid var(--line);cursor:pointer;transition:background .15s ease}
+  .row:hover{background:var(--navy-card)}
+  .row.throne{background:linear-gradient(90deg,rgba(111,180,214,.13),transparent 62%);
+    border-bottom:1px solid rgba(111,180,214,.34)}
+  .row.relegation{background:linear-gradient(90deg,rgba(128,52,74,.12),transparent 70%)}
+  .rank{font-family:var(--sans);font-size:clamp(26px,3vw,34px);font-weight:600;
+    text-align:center;color:var(--text)}
+  .throne .rank{color:var(--throne)}
+  .crown{display:block;font-family:var(--sans);font-size:clamp(9px,.9vw,11px);
+    letter-spacing:.16em;color:var(--throne);margin-top:3px;font-weight:600}
   .who{min-width:0}
-  .name{font-size:21px;font-weight:600;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
-  .city-tag{
-    width:8px;height:8px;border-radius:50%;flex:none;
-  }
-  .city-ws{background:var(--ws)} .city-sv{background:var(--sv)} .city-dc{background:var(--dc)}
-  .why{color:var(--mute);font-size:14px;margin-top:4px;max-width:60ch;
-    overflow:hidden;text-overflow:ellipsis;display:-webkit-box;
-    -webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .name{font-family:var(--sans);font-size:clamp(20px,2.3vw,27px);font-weight:600;
+    letter-spacing:.005em;display:flex;align-items:center;gap:11px;text-transform:uppercase}
+  .city-tag{width:9px;height:9px;border-radius:50%;flex:none}
+  .city-ws{background:var(--gold)} .city-sv{background:var(--blue)} .city-dc{background:var(--red)}
+  .why{color:var(--mute);font-size:clamp(14px,1.4vw,17px);margin-top:5px;max-width:64ch;
+    overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;
+    -webkit-box-orient:vertical;font-weight:400}
+  .meta{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+  .score{font-family:var(--sans);font-size:clamp(20px,2.3vw,26px);font-weight:600}
+  .delta{font-family:var(--sans);font-size:clamp(12px,1.2vw,15px);letter-spacing:.04em;
+    display:inline-flex;align-items:center;gap:6px;font-weight:500}
+  .delta.up{color:var(--up)} .delta.down{color:var(--down)}
+  .delta.flat{color:var(--mute)} .delta.new{color:var(--gold)}
+  .delta .tri-up{border-left:5px solid transparent;border-right:5px solid transparent;border-bottom:9px solid var(--up)}
+  .delta .tri-down{border-left:5px solid transparent;border-right:5px solid transparent;border-top:9px solid var(--down)}
 
-  .meta{text-align:right;display:flex;flex-direction:column;align-items:flex-end;gap:5px}
-  .score{
-    font-family:"SF Mono",ui-monospace,Menlo,monospace;
-    font-size:20px;font-weight:500;
-  }
-  .delta{
-    font-family:"SF Mono",ui-monospace,Menlo,monospace;
-    font-size:12px;letter-spacing:.04em;
-  }
-  .delta.up{color:var(--up)} .delta.down{color:var(--down)} .delta.flat{color:var(--mute)}
-  .delta.new{color:var(--gold)}
+  .zone-label{font-family:var(--sans);font-size:clamp(11px,1.05vw,13px);letter-spacing:.22em;
+    text-transform:uppercase;color:var(--red);padding:24px 0 8px;border-bottom:1px solid var(--line);font-weight:600}
 
-  /* relegation divider */
-  .zone-label{
-    font-family:"SF Mono",ui-monospace,Menlo,monospace;
-    font-size:10px;letter-spacing:.24em;text-transform:uppercase;
-    color:var(--dc);padding:22px 0 6px;border-bottom:1px solid var(--line);
-  }
-
-  /* receipts drawer */
-  .receipts{
-    grid-column:1/-1;max-height:0;overflow:hidden;
-    transition:max-height .28s ease;
-  }
-  .row.open .receipts{max-height:400px}
-  .receipts-inner{padding:6px 0 14px 68px}
-  .receipt{
-    font-size:13px;color:var(--mute);padding:8px 0;border-top:1px solid var(--line);
-    display:flex;gap:12px;align-items:baseline;
-  }
+  .receipts{grid-column:1/-1;max-height:0;overflow:hidden;transition:max-height .28s ease}
+  .row.open .receipts{max-height:460px}
+  .receipts-inner{padding:8px 0 16px 82px}
+  .receipt{font-size:clamp(13px,1.3vw,15px);color:var(--mute);padding:9px 0;
+    border-top:1px solid var(--line);display:flex;gap:14px;align-items:baseline}
   .receipt:first-child{border-top:none}
-  .receipt .rdate{
-    font-family:"SF Mono",ui-monospace,Menlo,monospace;
-    font-size:11px;color:var(--mute);flex:none;width:74px;
-  }
+  .receipt .rdate{font-family:var(--sans);font-size:12px;color:var(--mute);flex:none;width:82px;letter-spacing:.04em}
   .receipt .rwhy{color:var(--text)}
-  .receipt a{color:var(--sv);text-decoration:none;border-bottom:1px solid rgba(110,139,224,.3)}
-  .receipt .rdelta{font-family:"SF Mono",ui-monospace,Menlo,monospace;flex:none}
+  .receipt a{color:var(--blue-lt);text-decoration:none;border-bottom:1px solid rgba(146,188,210,.32)}
+  .receipt .rdelta{font-family:var(--sans);flex:none;font-weight:600}
   .rdelta.pos{color:var(--up)} .rdelta.neg{color:var(--down)}
-  .no-receipts{font-size:13px;color:var(--mute);font-style:italic;padding:8px 0}
+  .no-receipts{font-size:14px;color:var(--mute);font-style:italic;padding:9px 0}
 
-  /* states */
-  .state{padding:80px 20px;text-align:center;color:var(--mute);font-size:16px}
-  .state .big{font-size:22px;color:var(--text);margin-bottom:8px}
+  .state{padding:90px 24px;text-align:center;color:var(--mute);font-size:18px}
+  .state .big{font-family:var(--sans);font-size:24px;color:var(--text);margin-bottom:10px}
 
-  footer{margin-top:50px;padding-top:24px;border-top:1px solid var(--line);
-    font-size:13px;color:var(--mute);line-height:1.6}
+  footer{margin-top:54px;padding-top:26px;border-top:1px solid var(--line);
+    font-size:clamp(14px,1.4vw,16px);color:var(--mute);line-height:1.65}
   footer b{color:var(--text);font-weight:600}
 
-  @media (max-width:560px){
-    .row{grid-template-columns:42px 1fr auto;gap:10px}
-    .name{font-size:18px}.rank{font-size:22px}.score{font-size:17px}
-    .why{-webkit-line-clamp:3}
-    .receipts-inner{padding-left:14px}
+  /* ============ INLINE OPT-IN BAND (mid-board) ============ */
+  .optin-band{
+    margin:10px 0;padding:22px 26px;border-radius:12px;
+    background:linear-gradient(180deg,var(--navy-2),var(--navy-card));
+    border:1px solid var(--line);
+    display:flex;align-items:center;gap:22px;flex-wrap:wrap;justify-content:space-between;
+  }
+  .optin-copy{font-family:var(--sans);font-size:clamp(16px,1.7vw,20px);font-weight:600;
+    color:var(--text);letter-spacing:.01em;text-transform:uppercase}
+  .optin-copy span{color:var(--gold)}
+  .optin-form{flex:1;min-width:260px;display:flex;justify-content:flex-end}
+
+  @media (max-width:600px){
+    .optin-band{flex-direction:column;align-items:stretch;gap:14px;padding:20px}
+    .optin-form{justify-content:stretch}
+  }
+
+  @media (max-width:600px){
+    .mast{gap:18px;flex-direction:column-reverse;align-items:flex-start}
+    .logo{height:88px}
+    .row{grid-template-columns:46px 1fr auto;gap:12px}
+    .receipts-inner{padding-left:16px}
   }
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -153,18 +143,22 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="kicker">Three Cities · Wall Street · Silicon Valley · Washington</div>
-    <h1>The <em>Board</em></h1>
-    <p class="standfirst">Who is gaining and losing ground in the three-city war — scored on real events, not reputation. Every rank is a receipt. Tap a name to see what moved it.</p>
-    <div class="updated" id="updated"></div>
+    <div class="mast">
+      <div class="mast-text">
+        <h1><span class="pwr">Three Cities</span> <span class="brd">Power Rankings Board</span></h1>
+        <p class="standfirst">See who's winning and losing across America's power centers – Silicon Valley, Wall Street, Washington DC. Scored on real events, not reputation. Tap a name to see what's moving the needle.</p>
+        <div class="updated" id="updated"></div>
+      </div>
+      <img class="logo" id="logo" src="threecities_logo.png" alt="Three Cities">
+    </div>
   </header>
 
   <div class="legend">
-    <span><i class="dot" style="background:var(--ws)"></i>Wall Street</span>
-    <span><i class="dot" style="background:var(--sv)"></i>Silicon Valley</span>
-    <span><i class="dot" style="background:var(--dc)"></i>Washington</span>
-    <span><i class="dot" style="background:var(--up)"></i>Rising</span>
-    <span><i class="dot" style="background:var(--down)"></i>Falling</span>
+    <span><i class="dot" style="background:var(--gold)"></i>Wall Street</span>
+    <span><i class="dot" style="background:var(--blue)"></i>Silicon Valley</span>
+    <span><i class="dot" style="background:var(--red)"></i>Washington</span>
+    <span><i class="tri-up"></i>Rising</span>
+    <span><i class="tri-down"></i>Falling</span>
   </div>
 
   <main class="board" id="board">
@@ -172,108 +166,107 @@
   </main>
 
   <footer>
-    <b>How scoring works.</b> Players gain and lose points on real, dated events — a deal, a firing, a bill, a defection. Cross-city collisions score harder. Silence decays a score toward the middle. The throne changes hands only when someone's score truly passes the leader. Names below the line are fighting to stay on the board.
+    <b>How scoring works.</b> Players gain and lose points on real, dated events – a deal, a firing, a bill, a defection. Cross-city collisions score harder. Silence decays a score toward the middle. The throne changes hands only when someone's score truly passes the leader. Names below the line are fighting to stay on the board.
   </footer>
 </div>
 
 <script>
-  // ============ CONFIG: set these two URLs ============
-  const BOARD_URL = "https://raw.githubusercontent.com/threecities/three-cities-board/main/board.json";   // required: updated_board_json
-  const LEDGER_URL = "https://raw.githubusercontent.com/threecities/three-cities-board/main/ledger.json"; // optional: recent ledger rows JSON -> enables receipts
+  const BOARD_URL  = "https://raw.githubusercontent.com/threecities/three-cities-board/main/board.json";
+  const LEDGER_URL = "https://raw.githubusercontent.com/threecities/three-cities-board/main/ledger.json";
 
   const cityClass = c => ({WS:"city-ws",SV:"city-sv",DC:"city-dc"}[String(c||"").toUpperCase()]||"city-sv");
-
   function deltaCell(d){
     const s = String(d||"--").trim();
-    if(s==="--"||s==="") return `<span class="delta flat">—</span>`;
+    if(s==="--"||s==="") return `<span class="delta flat">–</span>`;
     if(s.toUpperCase()==="NEW") return `<span class="delta new">NEW</span>`;
-    if(/^up/i.test(s)) return `<span class="delta up">▲ ${s.replace(/up\s*/i,"")}</span>`;
-    if(/^down/i.test(s)) return `<span class="delta down">▼ ${s.replace(/down\s*/i,"")}</span>`;
+    if(/^up/i.test(s)) return `<span class="delta up"><i class="tri-up"></i>${s.replace(/up\s*/i,"")}</span>`;
+    if(/^down/i.test(s)) return `<span class="delta down"><i class="tri-down"></i>${s.replace(/down\s*/i,"")}</span>`;
     return `<span class="delta flat">${s}</span>`;
   }
-
-  function isRanked(r){ return typeof r==="number" || /^\d+$/.test(String(r)); }
+  const isRanked = r => typeof r==="number" || /^\d+$/.test(String(r));
+  document.getElementById("logo").addEventListener("error", function(){ this.style.display="none"; });
 
   async function load(){
     const board = document.getElementById("board");
     let data;
     try{
-      const res = await fetch(BOARD_URL, {cache:"no-store"});
+      const res = await fetch(BOARD_URL,{cache:"no-store"});
       if(!res.ok) throw new Error(res.status);
       data = await res.json();
     }catch(e){
       board.innerHTML = `<div class="state"><div class="big">The board is between editions.</div>Standings will appear here once today's run publishes.</div>`;
       return;
     }
-
-    let ledger = [];
-    if(LEDGER_URL){
-      try{ const lr = await fetch(LEDGER_URL,{cache:"no-store"}); if(lr.ok) ledger = await lr.json(); }catch(e){}
-    }
-    const byPlayer = {};
+    let ledger=[];
+    if(LEDGER_URL){ try{ const lr=await fetch(LEDGER_URL,{cache:"no-store"}); if(lr.ok) ledger=await lr.json(); }catch(e){} }
+    const byPlayer={};
     ledger.forEach(row=>{
       [["winner","delta_winner"],["loser","delta_loser"]].forEach(([nk,dk])=>{
         const nm=row[nk]; if(!nm||nm==="NONE") return;
         (byPlayer[nm]=byPlayer[nm]||[]).push({date:row.date,why:row.why_line,peg:row.peg_url,delta:row[dk]});
       });
     });
-
-    // keep only ranked + relegation + watch players with numeric ranks; sort
-    const players = data
-      .filter(p=>isRanked(p.rank) && String(p.name).trim() && String(p.name).toLowerCase()!=="name")
+    const players = data.filter(p=>isRanked(p.rank)&&String(p.name).trim()&&String(p.name).toLowerCase()!=="name")
       .sort((a,b)=>Number(a.rank)-Number(b.rank));
-
     if(!players.length){
       board.innerHTML = `<div class="state"><div class="big">No standings yet.</div>The board publishes after the next run.</div>`;
       return;
     }
-
-    let html = ""; let relegationDrawn=false;
+    let html=""; let relegationDrawn=false;
     players.forEach(p=>{
-      const rank=Number(p.rank);
-      const throne = rank===1;
-      const relegation = rank>=21 && rank<=25;
-      if(relegation && !relegationDrawn){ html += `<div class="zone-label">The relegation zone — fighting to stay on</div>`; relegationDrawn=true; }
-
-      const receipts = (byPlayer[p.name]||[]).slice(-6).reverse();
-      let rec = "";
+      const rank=Number(p.rank), throne=rank===1, relegation=rank>=21&&rank<=25;
+      if(relegation && !relegationDrawn){ html+=`<div class="zone-label">The relegation zone – fighting to stay on</div>`; relegationDrawn=true; }
+      const receipts=(byPlayer[p.name]||[]).slice(-6).reverse();
+      let rec="";
       if(LEDGER_URL){
         rec = receipts.length ? receipts.map(r=>{
-          const dv = Number(r.delta)||0;
-          const dCls = dv>0?"pos":(dv<0?"neg":"");
-          const dStr = dv>0?`+${dv}`:`${dv}`;
-          const why = r.peg ? `<a href="${r.peg}" target="_blank" rel="noopener">${r.why||"event"}</a>` : (r.why||"event");
+          const dv=Number(r.delta)||0, dCls=dv>0?"pos":(dv<0?"neg":""), dStr=dv>0?`+${dv}`:`${dv}`;
+          const why=r.peg?`<a href="${r.peg}" target="_blank" rel="noopener">${r.why||"event"}</a>`:(r.why||"event");
           return `<div class="receipt"><span class="rdate">${(r.date||"").slice(0,10)}</span><span class="rwhy">${why}</span><span class="rdelta ${dCls}">${dStr}</span></div>`;
-        }).join("") : `<div class="no-receipts">No scored events in the current window — holding on prior standing.</div>`;
+        }).join("") : `<div class="no-receipts">No scored events in the current window – holding on prior standing.</div>`;
       }
-
+      if(rank===6 || rank===16){
+        const mid = rank===6 ? "optin-mount-1" : "optin-mount-2";
+        html += `
+        <div class="optin-band">
+          <div class="optin-copy">Get the board in your inbox every morning. <span>Free.</span></div>
+          <div class="optin-form" id="${mid}"></div>
+        </div>`;
+      }
       html += `
-      <div class="row ${throne?"throne":""} ${relegation?"relegation":""}" data-name="${encodeURIComponent(p.name)}">
+      <div class="row ${throne?"throne":""} ${relegation?"relegation":""}">
         <div class="rank">${rank}${throne?'<span class="crown">THRONE</span>':''}</div>
         <div class="who">
           <div class="name"><span class="city-tag ${cityClass(p.city)}"></span>${p.name}</div>
           <div class="why">${p.why_line||""}</div>
         </div>
-        <div class="meta">
-          <span class="score">${Math.round(Number(p.score))}</span>
-          ${deltaCell(p.delta)}
-        </div>
+        <div class="meta"><span class="score">${Math.round(Number(p.score))}</span>${deltaCell(p.delta)}</div>
         ${LEDGER_URL?`<div class="receipts"><div class="receipts-inner">${rec}</div></div>`:""}
       </div>`;
     });
-
     board.innerHTML = html;
-
-    // updated stamp
-    const stamp = document.getElementById("updated");
-    const today = new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"});
+    // Third band after the full board
+    board.insertAdjacentHTML("afterend", `
+      <div class="optin-band" style="margin:28px 0 0">
+        <div class="optin-copy">Get the board in your inbox every morning. <span>Free.</span></div>
+        <div class="optin-form" id="optin-mount-3"></div>
+      </div>`);
+    // Mount the Beehiiv form into each band (each needs its own script instance)
+    ["optin-mount-1","optin-mount-2","optin-mount-3"].forEach(id=>{
+      const mount = document.getElementById(id);
+      if(mount && !mount.dataset.loaded){
+        const s = document.createElement("script");
+        s.async = true;
+        s.src = "https://subscribe-forms.beehiiv.com/v3/loader.js";
+        s.setAttribute("data-beehiiv-form","4d9dfe30-7255-4e6b-8db6-6102a94a359f");
+        mount.appendChild(s);
+        mount.dataset.loaded = "1";
+      }
+    });
+    const stamp=document.getElementById("updated");
+    const today=new Date().toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"});
     stamp.innerHTML = `<b>●</b> Updated ${today}`;
-
-    if(LEDGER_URL){
-      board.querySelectorAll(".row").forEach(row=>{
-        row.addEventListener("click",()=>row.classList.toggle("open"));
-      });
-    }
+    if(LEDGER_URL){ board.querySelectorAll(".row").forEach(row=>row.addEventListener("click",()=>row.classList.toggle("open"))); }
   }
   load();
 </script>
